@@ -1,0 +1,106 @@
+Controller	Handles HTTP-specific things: parsing the request, sending the response, setting status codes, cookies, headers. It does not directly interact with the database.
+
+Service	Handles the business logic, including CRUD operations. This is where you talk to the database via your models (Mongoose in your case).
+
+| Task                                       | Layer      |
+| ------------------------------------------ | ---------- |
+| Handle HTTP request/response, status codes | Controller |
+| Set cookies/headers                        | Controller |
+| Call service                               | Controller |
+| CRUD in database                           | Service    |
+| Hash passwords                             | Service    |
+| Compare passwords                          | Service    |
+| Generate/verify JWT                        | Service    |
+| Call external API                          | Service    |
+| Complex business logic                     | Service    |
+
+
+
+1️⃣ Why Refresh Tokens Exist
+
+Access tokens (JWTs) are short-lived (e.g., 15 minutes) for security.
+
+If an access token expires, the user would normally have to log in again.
+
+Refresh tokens are long-lived (e.g., 7 days) and are used to get a new access token without forcing the user to log in again.
+
+This makes your app secure (short-lived access tokens) and user-friendly (long-lived refresh tokens).
+
+2️⃣ How the Flow Works
+Step 1: Login
+
+User sends email + password to /auth/login.
+
+Server verifies credentials via authService.
+
+Server generates:
+
+Access token (short-lived, used for accessing protected APIs)
+
+Refresh token (long-lived, stored in DB and optionally as HttpOnly cookie)
+
+Server sends access token in response and refresh token in cookie.
+
+Step 2: Access Protected Route
+
+Client includes the access token in the Authorization header:
+
+Authorization: Bearer <access_token>
+
+
+Server verifies the access token.
+
+If valid → request succeeds.
+
+If expired → server responds with 401 Unauthorized.
+
+Step 3: Use Refresh Token
+
+When access token expires, client sends a request to /auth/refresh-token with the refresh token (usually from cookie).
+
+Server verifies:
+
+Token is valid (not tampered with) using jwt.verify.
+
+Token exists in the database for that user.
+
+If valid → server generates a new access token and returns it to the client.
+
+Client replaces the old access token with the new one and continues using protected routes.
+
+Step 4: Logout
+
+User clicks logout.
+
+Server removes refresh token from database and clears the cookie.
+
+Old refresh token can no longer be used to get new access tokens.
+
+3️⃣ Visual Flow
+[User Login]
+      |
+      v
+  Access Token (short) ----> Used for APIs
+  Refresh Token (long) ----> Stored in DB & cookie
+      |
+      v
+[Access Token Expires?] ---Yes---> Send refresh token to /auth/refresh-token
+      |                                        |
+      |                                        v
+      |                             Verify & Issue new Access Token
+      |                                        |
+      +----------------<----------------------+
+
+4️⃣ Security Notes
+
+Refresh tokens should never be stored in localStorage (risk of XSS). Use HttpOnly cookies instead.
+
+Access tokens are short-lived so even if stolen, they expire quickly.
+
+Always validate the refresh token against the database to prevent abuse.
+
+So in your backend:
+
+Controllers: handle the HTTP request/response for /auth/refresh-token.
+
+Services: verify the refresh token, check DB, and generate the new access token.
