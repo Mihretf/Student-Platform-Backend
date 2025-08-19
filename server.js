@@ -1,3 +1,4 @@
+require("dotenv").config();
 const express = require("express"); // this is a node framework that is used to create webservers and APIs
 
 const connectDB= require("./config/db_connection")
@@ -8,6 +9,8 @@ app.use(express.json());
 const PORT = 5000 // port number my variable will listen to
 const authRoutes = require("./routes/authRoutes")
 app.use("/api/v1/auth", authRoutes);
+const courseRoutes = require("./routes/courseRoutes")
+app.use("/api/v1/courses", courseRoutes);
 
 
 connectDB().then (()=>{

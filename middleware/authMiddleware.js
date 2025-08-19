@@ -32,4 +32,5 @@ const verifyToken = (allowedRoles = []) => {
   };
 };
 
+
 module.exports = verifyToken;
