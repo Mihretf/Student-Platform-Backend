@@ -13,6 +13,7 @@ const courseRoutes = require("./routes/courseRoutes")
 app.use("/api/v1/courses", courseRoutes);
 const assignmentRoutes = require("./routes/assignmentRoutes"); // Assignment routes
 app.use("/api/v1/assignments", assignmentRoutes); // Mount assignment routes at /api/v1/assignments
+app.use("/api/v1/ai", require("./routes/aiRoutes"));
 
 
 
