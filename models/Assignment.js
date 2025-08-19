@@ -8,7 +8,7 @@ const AssignmentSchema = new mongoose.Schema(
                 trim: true, 
         }, 
         courseId:{
-            type: mongoose.Schema.Type.ObjectId, 
+            type: mongoose.Schema.Types.ObjectId, 
             ref: "Course",
             required: true,
         }, 
